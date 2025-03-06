@@ -1,68 +1,106 @@
-# To-Do List gRPC Service
+# To-Do List gRPC and RESTful API
 
-This project is a simple To-Do list application implemented using gRPC in Go. It includes a gRPC server and client, and uses PostgreSQL as the database.
+This project provides a gRPC and RESTful API for managing a to-do list. It includes a gRPC server, a RESTful gateway, and a PostgreSQL database for storing tasks.
+
+## Directory Structure
+
+```
+/Users/first/Workspaces/Codes/Go/to-do-list-grpc-restful/
+  ├── proto/
+  │   ├── google/
+  │   │   ├── api/
+  │   │   │   ├── annotations.proto
+  │   │   │   ├── http.proto
+  │   ├── todo.proto
+  ├── server/
+  │   ├── db/
+  │   │   ├── db.go
+  │   ├── models/
+  │   │   ├── models.go
+  │   ├── server.go
+  ├── gateway/
+  │   ├── gateway.go
+  ├── README.md
+```
 
 ## Prerequisites
 
 - Go 1.16 or later
-- Docker and Docker Compose
 - PostgreSQL
+- Protocol Buffers compiler (`protoc`)
+- gRPC and gRPC-Gateway plugins for `protoc`
 
 ## Setup
 
-### 1. Clone the repository
+### 1. Install Dependencies
+
+Install the required Go packages:
 
 ```sh
-git clone https://github.com/yourusername/to-do-list-grpc.git
-cd to-do-list-grpc
+go get -u google.golang.org/grpc
+go get -u github.com/grpc-ecosystem/grpc-gateway/v2/runtime
+go get -u github.com/gin-gonic/gin
+go get -u gorm.io/gorm
+go get -u gorm.io/driver/postgres
 ```
 
-### 2. Start PostgreSQL using Docker Compose
+### 2. Generate gRPC and gRPC-Gateway Code
+
+Run the following command to generate the gRPC and gRPC-Gateway code:
 
 ```sh
-docker-compose up -d
+protoc \
+  --go_out=. \
+  --go-grpc_out=. \
+  --grpc-gateway_out=. \
+  --proto_path=./proto \
+  proto/todo.proto
 ```
 
-### 3. Install Go dependencies
+### 3. Set Up PostgreSQL
+
+Create a PostgreSQL database and update the connection string in `server/db/db.go`:
+
+```go
+dsn := "host=localhost user=myuser password=mypassword dbname=myuser sslmode=disable"
+```
+
+### 4. Run the gRPC Server
+
+Navigate to the `server` directory and run the gRPC server:
 
 ```sh
-go mod tidy
+cd server
+go run server.go
 ```
 
-### 4. Generate gRPC code
+The gRPC server will be running on port `50051`.
+
+### 5. Run the RESTful Gateway
+
+Navigate to the `gateway` directory and run the RESTful gateway:
 
 ```sh
-protoc --go_out=. --go-grpc_out=. proto/todo.proto
+cd gateway
+go run gateway.go
 ```
 
-### 5. Run the server
+The RESTful API will be running on port `8080`.
 
-```sh
-go run server/server.go
-```
+## API Endpoints
 
-### 6. Run the client
+### gRPC Endpoints
 
-```sh
-go run client/client.go
-```
+- `AddTask(TaskRequest) returns (TaskResponse)`
+- `GetTasks(Empty) returns (TaskListResponse)`
+- `CompleteTask(Task) returns (TaskResponse)`
 
-## Project Structure
+### RESTful Endpoints
 
-- `proto/todo.proto`: Protocol Buffers definition file.
-- `server/server.go`: gRPC server implementation.
-- `server/models/models.go`: Database models.
-- `server/db/db.go`: Database initialization.
-- `client/client.go`: gRPC client implementation.
-- `docker-compose.yml`: Docker Compose configuration for PostgreSQL.
-
-## gRPC Services
-
-- `AddTask(TaskRequest)`: Adds a new task.
-- `GetTasks(Empty)`: Retrieves all tasks.
-- `CompleteTask(Task)`: Marks a task as completed.
-- `DeleteTask(Task)`: Deletes a task.
+- `POST /tasks`: Add a new task
+- `GET /tasks`: Get all tasks
+- `PUT /tasks/{id}/complete`: Mark a task as completed
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
