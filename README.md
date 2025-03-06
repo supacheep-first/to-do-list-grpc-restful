@@ -5,7 +5,7 @@ This project provides a gRPC and RESTful API for managing a to-do list. It inclu
 ## Directory Structure
 
 ```
-/Users/first/Workspaces/Codes/Go/to-do-list-grpc-restful/
+to-do-list-grpc-restful/
   ├── proto/
   │   ├── google/
   │   │   ├── api/
