@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package todo;
+option go_package = "./proto";
+
+import "google/api/annotations.proto";
+import "google/api/http.proto";
+import "google/protobuf/empty.proto";
+
+message Empty {}
+
+message Task {
+    int32 id = 1;
+    string title = 2;
+    bool completed = 3;
+}
+
+message TaskRequest {
+    string title = 1;
+}
+
+message TaskResponse {
+    Task task = 1;
+}
+
+message TaskListResponse {
+    repeated Task tasks = 1;
+}
+
+service TodoService {
+    rpc AddTask(TaskRequest) returns (TaskResponse) {
+        option (google.api.http) = {
+            post: "/tasks"
+            body: "*"
+        };
+    }
+
+    rpc GetTasks(google.protobuf.Empty) returns (TaskListResponse) {
+        option (google.api.http) = {
+            get: "/tasks"
+        };
+    }
+
+    rpc CompleteTask(Task) returns (TaskResponse) {
+        option (google.api.http) = {
+            put: "/tasks/{id}/complete"
+        };
+    }
+}
